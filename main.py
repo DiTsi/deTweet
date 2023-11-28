@@ -33,7 +33,7 @@ def main():
         len(f_retweets)
     )
 
-    autostart = os.getenv('AUTOSTART')
+    autostart = os.getenv('AUTOSTART') == 'True'
     if not autostart:
         print(f'\nPress any key to continue...')
         input()
