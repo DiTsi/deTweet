@@ -20,87 +20,79 @@ class Tweet:
         else:
             self.type = 'retweet'
         self.status = 'unknown'  # 'unknown', 'exists', 'removed', 'max_attempts'
+        self.delete_attempt = 3  # number of max delete attempts
 
     def get_status(self, driver):
+        def wait_for_any_element(driver, locators, timeout=10):
+            def any_element_present(drv):
+                for locator, status in locators:
+                    try:
+                        element = drv.find_element(*locator)
+                        if element:
+                            return element, status
+                    except NoSuchElementException:
+                        pass
+                return False
+            return WebDriverWait(driver, timeout).until(any_element_present)
+
+        locator1 = (By.CSS_SELECTOR, 'div[data-testid="tweetText"]')  # tweet exists
+        locator2 = (By.CSS_SELECTOR, 'div[data-testid="error-detail"]')  # tweet didn't exists
+        locators = [
+            (locator1, 'exists'),
+            (locator2, 'removed')
+        ]
+
         driver.get(self.link)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="primaryColumn"]')))
-        sleep(1) #!
-        try:
-            spans = driver.find_elements(By.CSS_SELECTOR, "span")
-            search_text = 'Hmm...this page doesn’t exist. Try searching for something else.'
-            found = False
-            for span in spans:
-                if span.text == search_text:
-                    found = True
-                    break
-            if found:
+        element, status = wait_for_any_element(driver, locators)
+        if status == 'exists':
+            return 'exists'
+        elif status == 'removed':
+            if element.text == 'Hmm...this page doesn’t exist. Try searching for something else.\nSearch':
                 return 'removed'
             else:
-                return 'error' #! 'exists'
-        except NoSuchElementException:
-            return 'exists'
-
-    def set_status(self, status):
-        self.status = status
+                return 'error'
+        else:
+            return 'error'
 
     def remove(self, driver):
-        attempts = 3
-        wait = WebDriverWait(driver, 10)  # ожидание до 10 секунд
-        if self.type == 'tweet':
-            self.remove_tweet(driver, wait, attempts)
-        elif self.type == 'retweet':
-            self.remove_retweet(driver, wait, attempts)
-        else:
-            self.remove_reply(driver, wait, attempts)
+        wait = WebDriverWait(driver, 10) #!
+        attempts = 3 #!
+        while attempts > 0:
+            self.status = self.get_status(driver)
+            if self.status == 'removed':
+                return
 
-    def remove_tweet(self, driver, wait, attempts):
-        status = self.get_status(driver)
-        self.set_status(status)
-        while status != 'removed':
-            options = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[aria-label="More"]')))
-            options.click()
-            delete = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="Dropdown"] > div[role="menuitem"]')))
-            delete.click()
-            confirm = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="confirmationSheetConfirm"]')))
-            # confirm.click()
-
-            status = self.get_status(driver)
+            if self.type == 'tweet':
+                self.remove_tweet(wait)
+            elif self.type == 'retweet':
+                self.remove_retweet(wait)
+            else:
+                self.remove_reply(wait)
+            sleep(4 - attempts) #!
             attempts -= 1
-            if attempts == 0:
-                self.status = 'max_attempts'
-                break
+        self.status = 'max_attempts'
 
-    def remove_reply(self, driver, wait, attempts):
-        status = self.get_status(driver)
-        self.set_status(status)
-        while status != 'removed':
-            options = wait.until(EC.presence_of_element_located(By.CSS_SELECTOR, f'div[data-testid="cellInnerDiv"]:has(a[href="/{self.login}/status/{self.id}/quotes"]) div[aria-label="More"]'))
-            options.click()
-            delete = wait.until(EC.presence_of_element_located(By.CSS_SELECTOR, f'div[data-testid="Dropdown"] > div[role="menuitem"]'))
-            delete.click()
-            confirm = wait.until(EC.presence_of_element_located(By.CSS_SELECTOR, f'div[data-testid="confirmationSheetConfirm"]'))
-            # confirm.click()
+    def remove_tweet(self, wait):
+        options = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[aria-label="More"]')))
+        options.click()
+        delete = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="Dropdown"] > div[role="menuitem"]')))
+        delete.click()
+        confirm = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="confirmationSheetConfirm"]')))
+        # confirm.click()
 
-            status = self.get_status(driver)
-            attempts -= 1
-            if attempts == 0:
-                self.status = 'max_attempts'
-                break
+    def remove_reply(self, wait):
+        options = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="cellInnerDiv"]:has(a[href="/{self.login}/status/{self.id}/quotes"]) div[aria-label="More"]')))
+        options.click()
+        delete = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="Dropdown"] > div[role="menuitem"]')))
+        delete.click()
+        confirm = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="confirmationSheetConfirm"]')))
+        # confirm.click()
 
-    def remove_retweet(self, driver, wait, attempts):
-        status = self.get_status(driver)
-        self.set_status(status)
-        while status != 'removed':
-            unretweet = wait.until(EC.presence_of_element_located(By.CSS_SELECTOR, f'div[data-testid="unretweet"]'))
-            unretweet.click()
-            confirm = wait.until(EC.presence_of_element_located(By.CSS_SELECTOR, f'div[data-testid="unretweetConfirm"]'))
-            # confirm.click()
-
-            status = self.get_status(driver)
-            attempts -= 1
-            if attempts == 0:
-                self.status = 'max_attempts'
-                break
+    def remove_retweet(self, wait):
+        unretweet = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="unretweet"]')))
+        unretweet.click()
+        confirm = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="unretweetConfirm"]')))
+        # confirm.click()
 
     def __repr__(self):
         return f'{self.id}, {self.status}'

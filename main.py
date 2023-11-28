@@ -17,6 +17,7 @@ load_dotenv()
 
 def main():
     options = FirefoxOptions()
+    options.set_preference("layout.css.has-selector.enabled", True)
     # options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     tweets = get_tweets()
