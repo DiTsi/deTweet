@@ -1,10 +1,10 @@
 from datetime import datetime
 from time import sleep
 
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
 
 
 class Tweet:
@@ -20,7 +20,6 @@ class Tweet:
         else:
             self.type = 'retweet'
         self.status = 'unknown'  # 'unknown', 'exists', 'removed', 'max_attempts'
-        self.delete_attempt = 3  # number of max delete attempts
 
     def get_status(self, driver):
         def wait_for_any_element(driver, locators, timeout=10):
@@ -35,22 +34,16 @@ class Tweet:
                 return False
             return WebDriverWait(driver, timeout).until(any_element_present)
 
-        locator1 = (By.CSS_SELECTOR, 'div[data-testid="tweetText"]')  # tweet exists
-        locator2 = (By.CSS_SELECTOR, 'div[data-testid="error-detail"]')  # tweet didn't exists
+        tweet = (By.CSS_SELECTOR, 'div[data-testid="tweetText"]')  # tweet exists
+        doesnt_exists = (By.XPATH, "//span[contains(text(), 'Hmm...this page doesn’t exist. Try searching for something else.')]")  # tweet didn't exists
         locators = [
-            (locator1, 'exists'),
-            (locator2, 'removed')
+            (tweet, 'exists'),
+            (doesnt_exists, 'removed')
         ]
-
         driver.get(self.link)
         element, status = wait_for_any_element(driver, locators)
-        if status == 'exists':
-            return 'exists'
-        elif status == 'removed':
-            if element.text == 'Hmm...this page doesn’t exist. Try searching for something else.\nSearch':
-                return 'removed'
-            else:
-                return 'error'
+        if element:
+            return status
         else:
             return 'error'
 
@@ -78,7 +71,7 @@ class Tweet:
         delete = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="Dropdown"] > div[role="menuitem"]')))
         delete.click()
         confirm = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="confirmationSheetConfirm"]')))
-        # confirm.click()
+        confirm.click()
 
     def remove_reply(self, wait):
         options = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="cellInnerDiv"]:has(a[href="/{self.login}/status/{self.id}/quotes"]) div[aria-label="More"]')))
@@ -86,16 +79,16 @@ class Tweet:
         delete = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="Dropdown"] > div[role="menuitem"]')))
         delete.click()
         confirm = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="confirmationSheetConfirm"]')))
-        # confirm.click()
+        confirm.click()
 
     def remove_retweet(self, wait):
         unretweet = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="unretweet"]')))
         unretweet.click()
         confirm = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'div[data-testid="unretweetConfirm"]')))
-        # confirm.click()
+        confirm.click()
 
     def __repr__(self):
         return f'{self.id}, {self.status}'
 
     def __str__(self):
-        return f'{self.id} {self.type} {self.status}'
+        return f'{self.id} {self.status}'
