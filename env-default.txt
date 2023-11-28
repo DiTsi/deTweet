@@ -1,0 +1,3 @@
+NICKNAME=NickName
+PASSWORD=password
+BACKUP_PATH=./tweets.js
