@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime
 
@@ -13,6 +14,9 @@ from load_backup import tweets_list
 from selenium import webdriver
 from tweet import Tweet
 
+
+logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+log = logging.getLogger()
 load_dotenv()
 
 
@@ -36,24 +40,27 @@ def main():
 
     autostart = os.getenv('AUTOSTART') == 'True'
     if not autostart:
-        print(f'\nPress any key to continue...')
+        log.info(f'\nPress any key to continue...')
         input()
 
     driver = webdriver.Firefox(options=options)
     login(driver)
 
-    print(f'\nRemoving tweets:')
+    log.info('')
+    log.info(f'Removing tweets:')
     for i, t in enumerate(f_tweets, start=1):
         t.remove(driver)
-        print(f'  ({i}/{len(f_tweets)})  {t}')
-    print(f'\nRemoving replies:')
+        log.info(f'  ({i}/{len(f_tweets)})  {t}')
+    log.info('')
+    log.info(f'Removing replies:')
     for i, t in enumerate(f_replies, start=1):
         t.remove(driver)
-        print(f'  ({i}/{len(f_replies)})  {t}')
-    print(f'\nRemoving retweets:')
+        log.info(f'  ({i}/{len(f_replies)})  {t}')
+    log.info('')
+    log.info(f'Removing retweets:')
     for i, t in enumerate(f_retweets, start=1):
         t.remove(driver)
-        print(f'  ({i}/{len(f_retweets)})  {t}')
+        log.info(f'  ({i}/{len(f_retweets)})  {t}')
 
     driver.close()
 
@@ -61,14 +68,15 @@ def main():
 def preview(tweets_n, replies_n, retweets_n, f_tweets_n, f_replies_n, f_retweets_n):
     start_date_str = os.getenv('START_DATE')
     stop_date_str = os.getenv('STOP_DATE')
-    print(f'Full backup:')
-    print(f'  tweets: {tweets_n}')
-    print(f'  replies: {replies_n}')
-    print(f'  retweets: {retweets_n}')
-    print(f'\nObjects to remove ({start_date_str} - {stop_date_str})')
-    print(f'  tweets: {f_tweets_n}')
-    print(f'  replies: {f_replies_n}')
-    print(f'  retweets: {f_retweets_n}')
+    log.info(f'Full backup:')
+    log.info(f'  tweets: {tweets_n}')
+    log.info(f'  replies: {replies_n}')
+    log.info(f'  retweets: {retweets_n}')
+    log.info(f'')
+    log.info(f'Objects to remove ({start_date_str} - {stop_date_str})')
+    log.info(f'  tweets: {f_tweets_n}')
+    log.info(f'  replies: {f_replies_n}')
+    log.info(f'  retweets: {f_retweets_n}')
 
 
 def date_filter(objs):
