@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from time import sleep
 
@@ -11,7 +12,7 @@ class Tweet:
     def __init__(self, tweet, login):
         self.id = tweet['id']
         self.login = login
-        self.link = f'https://twitter.com/{login}/status/{self.id}'
+        self.link = 'https://twitter.com/' + login + '/status/' + self.id
         self.created = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
         if 'in_reply_to_status_id' in tweet:
             self.type = 'reply'
@@ -22,22 +23,22 @@ class Tweet:
         self.status = 'unknown'  # 'unknown', 'exists', 'removed', 'max_attempts'
 
     def get_status(self, driver):
-        def wait_for_any_element(driver, locators, timeout=10):
-            def any_element_present(drv):
-                for locator, status in locators:
+        def wait_for_any_element(drv, lctrs, timeout=int(os.getenv('WAIT'))):
+            def any_element_present(drv_):
+                for l, s in lctrs:
                     try:
-                        element = drv.find_element(*locator)
-                        if element:
-                            return element, status
+                        e = drv_.find_element(*l)
+                        if e:
+                            return e, s
                     except NoSuchElementException:
                         pass
                 return False
-            return WebDriverWait(driver, timeout).until(any_element_present)
+            return WebDriverWait(drv, timeout).until(any_element_present)
 
-        tweet = (By.CSS_SELECTOR, 'div[data-testid="tweetText"]')  # tweet exists
-        doesnt_exists = (By.XPATH, "//span[contains(text(), 'Hmm...this page doesn’t exist. Try searching for something else.')]")  # tweet didn't exists
+        exists = (By.CSS_SELECTOR, 'div[data-testid="tweetText"]')
+        doesnt_exists = (By.XPATH, "//span[contains(text(), 'Hmm...this page doesn’t exist. Try searching for something else.')]")
         locators = [
-            (tweet, 'exists'),
+            (exists, 'exists'),
             (doesnt_exists, 'removed')
         ]
         driver.get(self.link)
@@ -48,8 +49,8 @@ class Tweet:
             return 'error'
 
     def remove(self, driver):
-        wait = WebDriverWait(driver, 10) #!
-        attempts = 3 #!
+        wait = WebDriverWait(driver, int(os.getenv('WAIT')))
+        attempts = int(os.getenv('MAX_ATTEMPTS'))
         while attempts > 0:
             self.status = self.get_status(driver)
             if self.status == 'removed':
@@ -61,7 +62,7 @@ class Tweet:
                 self.remove_retweet(wait)
             else:
                 self.remove_reply(wait)
-            sleep(4 - attempts) #!
+            sleep(int(os.getenv('MAX_ATTEMPTS')) + 1 - attempts)
             attempts -= 1
         self.status = 'max_attempts'
 

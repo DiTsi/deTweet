@@ -42,23 +42,17 @@ def main():
     login(driver)
 
     print(f'\nRemoving tweets:')
-    i = 1
-    for t in f_tweets:
+    for i, t in enumerate(f_tweets, start=1):
         t.remove(driver)
         print(f'  ({i}/{len(f_tweets)})  {t}')
-        i += 1
     print(f'\nRemoving replies:')
-    i = 1
-    for t in f_replies:
+    for i, t in enumerate(f_replies, start=1):
         t.remove(driver)
         print(f'  ({i}/{len(f_replies)})  {t}')
-        i += 1
     print(f'\nRemoving retweets:')
-    i = 1
-    for t in f_retweets:
+    for i, t in enumerate(f_retweets, start=1):
         t.remove(driver)
         print(f'  ({i}/{len(f_retweets)})  {t}')
-        i += 1
 
     driver.close()
 
