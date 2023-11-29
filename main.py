@@ -19,7 +19,8 @@ load_dotenv()
 def main():
     options = FirefoxOptions()
     options.set_preference("layout.css.has-selector.enabled", True)
-    # options.add_argument("--headless")
+    if os.getenv('HEADLESS') == 'True':
+        options.add_argument("--headless")
     tweets, replies, retweets = get_tweets()
     f_tweets = date_filter(tweets)
     f_replies = date_filter(replies)

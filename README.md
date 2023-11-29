@@ -27,6 +27,7 @@ Automatically delete your Twitter posts
 |-|-|-|
 |AUTOSTART|Start delete process without questions|False|
 |BACKUP_PATH|Path to `tweets.js` file|./tweets.js|
+|HEADLESS|Run Firefox without interface|False|
 |MAX_ATTEMPTS|Max number of delete attempts|3|
 |NICKNAME|Your nickname without '@'|NickName|
 |PASSWORD|Your account password|password|
