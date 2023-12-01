@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from datetime import datetime
@@ -21,51 +22,68 @@ load_dotenv()
 
 
 def main():
+    nickname = os.getenv('NICKNAME')
+    formatted_datetime = datetime.now().strftime('%Y.%m.%d.%H.%M.%S')
+    status_file = f"./{formatted_datetime}_{nickname}.json"
+
     options = FirefoxOptions()
     options.set_preference("layout.css.has-selector.enabled", True)
     if os.getenv('HEADLESS') == 'True':
         options.add_argument("--headless")
+    delete_tweets = os.getenv('DELETE_TWEETS') == 'True'
+    delete_replies = os.getenv('DELETE_REPLIES') == 'True'
+    delete_retweets = os.getenv('DELETE_RETWEETS') == 'True'
+
     tweets, replies, retweets = get_tweets()
     f_tweets = date_filter(tweets)
     f_replies = date_filter(replies)
     f_retweets = date_filter(retweets)
     preview(
-        len(tweets),
-        len(replies),
-        len(retweets),
-        len(f_tweets),
-        len(f_replies),
-        len(f_retweets)
+        len(tweets), len(replies), len(retweets),
+        len(f_tweets), len(f_replies), len(f_retweets),
+        delete_tweets, delete_replies, delete_retweets
     )
-
     autostart = os.getenv('AUTOSTART') == 'True'
     if not autostart:
         log.info(f'\nPress any key to continue...')
         input()
+    form_status(status_file, nickname, 'starting', f_tweets, f_replies, f_retweets)
 
+    log.info('')
+    log.info(f'Starting driver...')
     driver = webdriver.Firefox(options=options)
+    log.info('Driver started')
+    log.info(f'Signing in...')
     login(driver)
+    log.info('Signed in')
 
-    log.info('')
-    log.info(f'Removing tweets:')
-    for i, t in enumerate(f_tweets, start=1):
-        t.remove(driver)
-        log.info(f'  ({i}/{len(f_tweets)})  {t}')
-    log.info('')
-    log.info(f'Removing replies:')
-    for i, t in enumerate(f_replies, start=1):
-        t.remove(driver)
-        log.info(f'  ({i}/{len(f_replies)})  {t}')
-    log.info('')
-    log.info(f'Removing retweets:')
-    for i, t in enumerate(f_retweets, start=1):
-        t.remove(driver)
-        log.info(f'  ({i}/{len(f_retweets)})  {t}')
+    if delete_tweets:
+        log.info('')
+        log.info(f'Removing tweets...')
+        for i, t in enumerate(f_tweets, start=1):
+            t.remove(driver)
+            form_status(status_file, nickname, 'running', f_tweets, f_replies, f_retweets)
+            log.info(f'  {t}  ({i}/{len(f_tweets)})')
+    if delete_replies:
+        log.info('')
+        log.info(f'Removing replies...')
+        for i, t in enumerate(f_replies, start=1):
+            t.remove(driver)
+            form_status(status_file, nickname, 'running', f_tweets, f_replies, f_retweets)
+            log.info(f'  {t}  ({i}/{len(f_replies)})')
+    if delete_retweets:
+        log.info('')
+        log.info(f'Removing retweets...')
+        for i, t in enumerate(f_retweets, start=1):
+            t.remove(driver)
+            form_status(status_file, nickname, 'running', f_tweets, f_replies, f_retweets)
+            log.info(f'  {t}  ({i}/{len(f_retweets)})')
+    form_status(status_file, nickname, 'finished', f_tweets, f_replies, f_retweets)
 
     driver.close()
 
 
-def preview(tweets_n, replies_n, retweets_n, f_tweets_n, f_replies_n, f_retweets_n):
+def preview(tweets_n, replies_n, retweets_n, f_tweets_n, f_replies_n, f_retweets_n, delete_tweets, delete_replies, delete_retweets):
     start_date_str = os.getenv('START_DATE')
     stop_date_str = os.getenv('STOP_DATE')
     log.info(f'Full backup:')
@@ -73,10 +91,13 @@ def preview(tweets_n, replies_n, retweets_n, f_tweets_n, f_replies_n, f_retweets
     log.info(f'  replies: {replies_n}')
     log.info(f'  retweets: {retweets_n}')
     log.info(f'')
-    log.info(f'Objects to remove ({start_date_str} - {stop_date_str})')
-    log.info(f'  tweets: {f_tweets_n}')
-    log.info(f'  replies: {f_replies_n}')
-    log.info(f'  retweets: {f_retweets_n}')
+    log.info(f'Objects to remove ({start_date_str}..{stop_date_str})')
+    if delete_tweets:
+        log.info(f'  tweets: {f_tweets_n}')
+    if delete_replies:
+        log.info(f'  replies: {f_replies_n}')
+    if delete_retweets:
+        log.info(f'  retweets: {f_retweets_n}')
 
 
 def date_filter(objs):
@@ -97,10 +118,10 @@ def get_tweets():
     tweets = list()
     replies = list()
     retweets = list()
-    login = os.getenv('NICKNAME')
+    nickname = os.getenv('NICKNAME')
     backup_file = os.getenv('BACKUP_PATH')
     for t in tweets_list(backup_file):
-        obj = Tweet(t, login)
+        obj = Tweet(t, nickname)
         if obj.type == 'tweet':
             tweets.append(obj)
         elif obj.type == 'reply':
@@ -108,6 +129,18 @@ def get_tweets():
         else:
             retweets.append(obj)
     return tweets, replies, retweets
+
+
+def form_status(status_file, username, status, tweets, replies, retweets):
+    state = {
+        'status': f'{status}',
+        'username': f'{username}',
+        'tweets': [{'id': p.id, 'status': p.status} for p in tweets],
+        'replies': [{'id': p.id, 'status': p.status} for p in replies],
+        'retweets': [{'id': p.id, 'status': p.status} for p in retweets]
+    }
+    with open(status_file, 'w') as json_file:
+        json.dump(state, json_file, indent=2)
 
 
 def login(driver):

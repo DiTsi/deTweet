@@ -89,7 +89,7 @@ class Tweet:
         confirm.click()
 
     def __repr__(self):
-        return f'{self.id}, {self.status}'
+        return f'{self.type} {self.id}, {self.status}'
 
     def __str__(self):
-        return f'{self.id} {self.status}'
+        return f'{self.type} {self.id} {self.status}'
