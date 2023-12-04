@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  detweet:
+    image: ghcr.io/ditsi/detweet:main
+    environment:
+      NICKNAME: "NickName"
+      PASSWORD: "password"
+      TIMEZONE: "Asia/Tashkent"
+      START_DATE: "2006-03-21"
+      STOP_DATE: "2030-06-30"
+      DELETE_TWEETS: "True"
+      DELETE_REPLIES: "True"
+      DELETE_RETWEETS: "True"
+
+      AUTOSTART: "True"
+      BACKUP_PATH: "/tweets.js"
+      HEADLESS: "True"
+      MAX_ATTEMPTS: "3"
+      WAIT: "15"
+    volumes:
+      - ./tweets.js:/tweets.js:r

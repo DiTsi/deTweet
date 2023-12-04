@@ -91,7 +91,7 @@ def preview(tweets_n, replies_n, retweets_n, f_tweets_n, f_replies_n, f_retweets
     log.info(f'  replies: {replies_n}')
     log.info(f'  retweets: {retweets_n}')
     log.info(f'')
-    log.info(f'Objects to remove ({start_date_str}..{stop_date_str})')
+    log.info(f'Objects to remove ({start_date_str}..{stop_date_str}):')
     if delete_tweets:
         log.info(f'  tweets: {f_tweets_n}')
     if delete_replies:
