@@ -15,6 +15,7 @@ services:
       AUTOSTART: "True"
       BACKUP_PATH: "/tweets.js"
       HEADLESS: "True"
+      STATUS_PATH=: "./status"
       MAX_ATTEMPTS: "3"
       WAIT: "15"
     volumes:

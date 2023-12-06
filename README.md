@@ -13,7 +13,7 @@ Automatically delete your Twitter posts
 There are two options: using Docker (simple) and using source code
 
 ### Docker
-- Create `docker-compose.yml` file, paste content below and set your environment variables
+- create `docker-compose.yml` file, paste content below and set your environment variables
   ```yaml
   version: "3.7"
   services:
@@ -23,8 +23,8 @@ There are two options: using Docker (simple) and using source code
         NICKNAME: "NickName"
         PASSWORD: "password"
         TIMEZONE: "Asia/Tashkent"
-        START_DATE: "2022-08-07"
-        STOP_DATE: "2022-08-18"
+        START_DATE: "2006-03-21"
+        STOP_DATE: "2030-06-30"
         DELETE_TWEETS: "True"
         DELETE_REPLIES: "True"
         DELETE_RETWEETS: "True"
@@ -32,6 +32,7 @@ There are two options: using Docker (simple) and using source code
         AUTOSTART: "True"
         BACKUP_PATH: "/tweets.js"
         HEADLESS: "True"
+        STATUS_PATH: "/status"
         MAX_ATTEMPTS: "3"
         WAIT: "15"
       volumes:
@@ -39,12 +40,12 @@ There are two options: using Docker (simple) and using source code
   ```
 - run `docker-compose up`
 
-### source code
-- Download your Twitter `archive` from [here](https://twitter.com/settings/download_your_data)
-- Git clone this project with `git clone git@github.com:DiTsi/deTweet.git`
-- Copy `deTweet/env-default.txt` to `deTweet/.env` and set [environment variables](#environment-variables)
-- Get file `data/tweets.js` from Twitter archive and put it to `deTweet/` root directory
-- Go to `deTweet/` directory and run:
+### Source code
+- download your Twitter `archive` from [here](https://twitter.com/settings/download_your_data)
+- git clone this project with `git clone git@github.com:DiTsi/deTweet.git`
+- copy `deTweet/env-default.txt` to `deTweet/.env` and set [environment variables](#environment-variables)
+- get file `data/tweets.js` from Twitter archive and put it to `deTweet/` root directory
+- go to `deTweet/` directory and run:
   ```bash
   python -m venv env
   source env/bin/activate
@@ -61,6 +62,7 @@ There are two options: using Docker (simple) and using source code
 |DELETE_REPLIES|Delete replies|True|
 |DELETE_RETWEETS|Delete retweets|True|
 |HEADLESS|Run Firefox without interface|False|
+|STATUS_PATH|Path to status directory|./status|
 |MAX_ATTEMPTS|Max number of delete attempts|3|
 |NICKNAME|Your nickname without '@'|NickName|
 |PASSWORD|Your account password|password|

@@ -10,5 +10,6 @@ TIMEZONE=Asia/Tashkent
 AUTOSTART=False
 BACKUP_PATH=./tweets.js
 HEADLESS=False
+STATUS_PATH=./status
 MAX_ATTEMPTS=3
 WAIT=10
