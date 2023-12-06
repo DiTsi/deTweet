@@ -40,9 +40,6 @@ jobs:
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-    - name: Get the tag name
-      run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
     - name: Build Docker image
       if: github.ref == 'refs/heads/main'
       run: docker build .
@@ -53,5 +50,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: "$TAG_NAME"
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
