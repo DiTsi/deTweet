@@ -1,13 +1,15 @@
 version: "3.7"
 services:
   detweet:
-    image: ghcr.io/ditsi/detweet:main
+    image: ghcr.io/ditsi/detweet:v0.2
     environment:
-      NICKNAME: "NickName"
+#      NICKNAME: "NickName"
+#      PASSWORD: "password"
+      NICKNAME: "DiTsi1"
       PASSWORD: "password"
       TIMEZONE: "Asia/Tashkent"
-      START_DATE: "2006-03-21"
-      STOP_DATE: "2030-06-30"
+      START_DATE: "2022-08-07"
+      STOP_DATE: "2022-09-07"
       DELETE_TWEETS: "True"
       DELETE_REPLIES: "True"
       DELETE_RETWEETS: "True"
@@ -15,8 +17,9 @@ services:
       AUTOSTART: "True"
       BACKUP_PATH: "/tweets.js"
       HEADLESS: "True"
-      STATUS_PATH=: "./status"
+      STATUS_PATH=: "/status"
       MAX_ATTEMPTS: "3"
       WAIT: "15"
     volumes:
       - ./tweets.js:/tweets.js:ro
+      - ./status:/status

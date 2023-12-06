@@ -36,7 +36,8 @@ There are two options: using Docker (simple) and using source code
         MAX_ATTEMPTS: "3"
         WAIT: "15"
       volumes:
-        - ./tweets.js:/tweets.js:r
+        - ./tweets.js:/tweets.js:ro
+        - ./status:/status
   ```
 - run `docker-compose up`
 

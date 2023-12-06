@@ -1,1 +1,10 @@
-*.js
+env
+venv
+cookies.dump
+__pycache__
+.vscode
+.idea
+.env
+selenium
+tweets.js
+*.json

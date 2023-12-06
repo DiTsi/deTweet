@@ -18,12 +18,13 @@ from tweet import Tweet
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 log = logging.getLogger()
-status_file_path = os.getenv('STATUS_PATH', default='./status')
+
 load_dotenv()
 
 
 def main():
     nickname = os.getenv('NICKNAME')
+    status_file_path = os.getenv('STATUS_PATH')
     formatted_datetime = datetime.now().strftime('%Y.%m.%d.%H.%M.%S')
     status_file = f"{status_file_path}/{formatted_datetime}_{nickname}.json"
 
