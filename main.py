@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from load_backup import tweets_list
 from selenium import webdriver
-from tweet import Tweet
+from tweet import Tweet, wait_for_any_element
 
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
@@ -148,7 +148,8 @@ def form_status(status_file, username, status, tweets, replies, retweets):
 def login(driver):
     nickname = os.getenv("NICKNAME")
     password = os.getenv("PASSWORD")
-    wait = WebDriverWait(driver, 30) #!
+    email = os.getenv("EMAIL")
+    wait = WebDriverWait(driver, int(os.getenv('WAIT')))
     driver.get("https://twitter.com/i/flow/login")
     username = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'input[autocomplete="username"]')))
     username.send_keys(f'{nickname}')
@@ -156,7 +157,18 @@ def login(driver):
     username = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'input[autocomplete="current-password"]')))
     username.send_keys(f'{password}')
     username.send_keys(Keys.ENTER)
-    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'a[href="/{nickname}"]')))
+
+    need_email = (By.CSS_SELECTOR, 'input[data-testid="ocfEnterTextTextInput"]')
+    logged_in = (By.CSS_SELECTOR, f'a[href="/compose/tweet"]')
+    locators = [
+        (need_email, '2step'),
+        (logged_in, 'done')
+    ]
+    element, status = wait_for_any_element(driver, locators)
+    if status == '2step':
+        element.send_keys(f'{email}')
+        element.send_keys(Keys.ENTER)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, f'a[href="/compose/tweet"]')))
 
 
 if __name__ == "__main__":

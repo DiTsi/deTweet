@@ -8,3 +8,5 @@ __pycache__
 selenium
 tweets.js
 *.json
+docker-compose-test.yml
+status

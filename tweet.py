@@ -2,10 +2,13 @@ import os
 from datetime import datetime
 from time import sleep
 
+from dotenv import load_dotenv
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
+load_dotenv()
 
 
 class Tweet:
@@ -23,18 +26,6 @@ class Tweet:
         self.status = 'unknown'  # 'unknown', 'exists', 'removed', 'max_attempts'
 
     def get_status(self, driver):
-        def wait_for_any_element(drv, lctrs, timeout=int(os.getenv('WAIT'))):
-            def any_element_present(drv_):
-                for l, s in lctrs:
-                    try:
-                        e = drv_.find_element(*l)
-                        if e:
-                            return e, s
-                    except NoSuchElementException:
-                        pass
-                return False
-            return WebDriverWait(drv, timeout).until(any_element_present)
-
         exists = (By.CSS_SELECTOR, 'div[data-testid="tweetText"]')
         doesnt_exists = (By.XPATH, "//span[contains(text(), 'Hmm...this page doesn’t exist. Try searching for something else.')]")
         locators = [
@@ -93,3 +84,16 @@ class Tweet:
 
     def __str__(self):
         return f'{self.type} {self.id} {self.status}'
+
+
+def wait_for_any_element(drv, lctrs, timeout=int(os.getenv('WAIT'))):
+    def any_element_present(drv_):
+        for l_, s_ in lctrs:
+            try:
+                e = drv_.find_element(*l_)
+                if e:
+                    return e, s_
+            except NoSuchElementException:
+                pass
+        return False
+    return WebDriverWait(drv, timeout).until(any_element_present)

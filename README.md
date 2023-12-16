@@ -22,6 +22,7 @@ There are two options: using Docker (simple) and using source code
       environment:
         NICKNAME: "NickName"
         PASSWORD: "password"
+        EMAIL: "email@mail.com"
         TIMEZONE: "Asia/Tashkent"
         START_DATE: "2006-03-21"
         STOP_DATE: "2030-06-30"
@@ -42,6 +43,7 @@ There are two options: using Docker (simple) and using source code
 - run `docker-compose up`
 
 ### Source code
+- install [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/new)
 - download your Twitter `archive` from [here](https://twitter.com/settings/download_your_data)
 - git clone this project with `git clone git@github.com:DiTsi/deTweet.git`
 - copy `deTweet/env-default.txt` to `deTweet/.env` and set [environment variables](#environment-variables)
@@ -62,6 +64,7 @@ There are two options: using Docker (simple) and using source code
 |DELETE_TWEETS|Delete tweets|True|
 |DELETE_REPLIES|Delete replies|True|
 |DELETE_RETWEETS|Delete retweets|True|
+|EMAIL|Your Twitter email|email@mail.com|
 |HEADLESS|Run Firefox without interface|False|
 |STATUS_PATH|Path to status directory|./status|
 |MAX_ATTEMPTS|Max number of delete attempts|3|
